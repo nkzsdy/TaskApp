@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        fab.setOnClickListener { view ->
+        fab.setOnClickListener {
             val intent = Intent(this@MainActivity, InputActivity::class.java)
             startActivity(intent)
         }
@@ -87,7 +87,27 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
+        // カテゴリ検索
+        category_search_button.setOnClickListener {
+            val categorySearchString = category_search_text.text.toString()
+            categorySearch(categorySearchString)
+        }
+
         reloadListView()
+    }
+
+    private fun categorySearch(categorySearchString: String) {
+        val taskRealmResults =
+            if (categorySearchString.isNotEmpty()) {
+                mRealm.where(Task::class.java).equalTo("category", categorySearchString).findAll()
+                    .sort("date", Sort.DESCENDING)
+            } else {
+                mRealm.where(Task::class.java).findAll().sort("date", Sort.DESCENDING)
+            }
+
+        mTaskAdapter.taskList = mRealm.copyFromRealm(taskRealmResults)
+        listView1.adapter = mTaskAdapter
+        mTaskAdapter.notifyDataSetChanged()
     }
 
     private fun reloadListView() {
