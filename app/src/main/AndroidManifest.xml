@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="jp.techacademy.ryota.taskapp">
 
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name=".TaskApp"
@@ -12,6 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -22,6 +23,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".InputActivity"
             android:label="タスク"
@@ -29,11 +31,20 @@
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="jp.techacademy.ryota.taskapp.MainActivity"/>
+                android:value="jp.techacademy.ryota.taskapp.MainActivity" />
+        </activity>
+
+        <activity
+            android:name=".CreateCategoryActivity"
+            android:label="カテゴリ作成"
+            android:parentActivityName=".InputActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="jp.techacademy.ryota.taskapp.InputActivity" />
         </activity>
 
         <receiver android:name=".TaskAlarmReceiver" />
-
     </application>
 
 </manifest>

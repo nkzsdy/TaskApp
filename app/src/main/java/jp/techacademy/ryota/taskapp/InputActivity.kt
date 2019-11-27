@@ -68,6 +68,12 @@ class InputActivity : AppCompatActivity() {
             supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         }
 
+        // カテゴリ作成画面に遷移できるようにする
+        create_category.setOnClickListener {
+            val intent = Intent(this@InputActivity, CreateCategoryActivity::class.java)
+            startActivity(intent)
+        }
+
         // UI部品の設定
         date_button.setOnClickListener(mOnDateClickListener)
         times_button.setOnClickListener(mOnTimeClickListener)

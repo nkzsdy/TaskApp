@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app= "http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -13,51 +13,80 @@
     tools:context=".InputActivity"
     tools:showIn="@layout/activity_input">
 
-    <EditText
-        android:id="@+id/title_edit_text"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="タイトル" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/content_edit_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/title_edit_text"
-        android:hint="内容" />
+        <EditText
+            android:id="@+id/title_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="タイトル" />
 
-    <EditText
-        android:id="@+id/category_edit_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/content_edit_text"
-        android:hint="カテゴリ" />
+        <EditText
+            android:id="@+id/content_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="内容" />
 
-    <Button
-        android:id="@+id/date_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/category_edit_text"
-        android:layout_alignParentStart="true"
-        android:layout_toLeftOf="@+id/times_button"
-        android:text="----/00/00"
-        style="@style/Widget.AppCompat.Button.Borderless" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <Button
-        android:id="@+id/times_button"
-        android:layout_width="96dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/category_edit_text"
-        android:layout_alignParentRight="true"
-        android:text="--:--"
-        style="@style/Widget.AppCompat.Button.Borderless" />
+            <EditText
+                android:id="@+id/category_edit_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_toStartOf="@+id/create_category"
+                android:hint="カテゴリ"
+                android:visibility="invisible" />
 
-    <Button
-        android:id="@+id/done_button"
-        android:layout_width="96dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/times_button"
-        android:layout_alignParentRight="true"
-        android:text="決定" />
+            <Spinner
+                android:id="@+id/select_category"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_toStartOf="@+id/create_category" />
+
+            <Button
+                android:id="@+id/create_category"
+                android:layout_width="110dp"
+                android:layout_height="40dp"
+                android:layout_alignParentRight="true"
+                android:text="カテゴリ作成" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <Button
+                android:id="@+id/date_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_toLeftOf="@+id/times_button"
+                android:text="----/00/00"
+                style="@style/Widget.AppCompat.Button.Borderless" />
+
+            <Button
+                android:id="@+id/times_button"
+                android:layout_width="96dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:text="--:--"
+                style="@style/Widget.AppCompat.Button.Borderless" />
+
+            <Button
+                android:id="@+id/done_button"
+                android:layout_width="96dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/times_button"
+                android:layout_alignParentRight="true"
+                android:text="決定" />
+        </RelativeLayout>
+    </LinearLayout>
 
 </RelativeLayout>
