@@ -14,10 +14,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 const val EXTRA_TASK = "jp.techacademy.ryota.taskapp.TASK"
 
 class MainActivity : AppCompatActivity() {
+    private var categorySearchString = ""
     private lateinit var mRealm: Realm
     private val mRealmListener = object : RealmChangeListener<Realm> {
         override fun onChange(element: Realm) {
-            reloadListView()
+            reloadListView(categorySearchString)
         }
     }
     private lateinit var mTaskAdapter: TaskAdapter
@@ -76,7 +77,7 @@ class MainActivity : AppCompatActivity() {
                 val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
                 alarmManager.cancel(resultPendingIntent)
 
-                reloadListView()
+                reloadListView(categorySearchString)
             }
 
             builder.setNegativeButton("CANCEL", null)
@@ -89,31 +90,22 @@ class MainActivity : AppCompatActivity() {
 
         // カテゴリ検索
         category_search_button.setOnClickListener {
-            val categorySearchString = category_search_text.text.toString()
-            categorySearch(categorySearchString)
+            categorySearchString = category_search_text.text.toString()
+            reloadListView(categorySearchString)
         }
 
-        reloadListView()
+        reloadListView(categorySearchString)
     }
 
-    private fun categorySearch(categorySearchString: String) {
-        val taskRealmResults =
-            if (categorySearchString.isNotEmpty()) {
-                mRealm.where(Task::class.java).equalTo("category", categorySearchString).findAll()
-                    .sort("date", Sort.DESCENDING)
-            } else {
-                mRealm.where(Task::class.java).findAll().sort("date", Sort.DESCENDING)
-            }
-
-        mTaskAdapter.taskList = mRealm.copyFromRealm(taskRealmResults)
-        listView1.adapter = mTaskAdapter
-        mTaskAdapter.notifyDataSetChanged()
-    }
-
-    private fun reloadListView() {
+    private fun reloadListView(categorySearchString: String) {
         // Realmデータベースから、「全てのデータを取得して新しい日時順に並べた結果」を取得
         val taskRealmResults =
-            mRealm.where(Task::class.java).findAll().sort("date", Sort.DESCENDING)
+            if (categorySearchString.isEmpty()) {
+                mRealm.where(Task::class.java).findAll().sort("date", Sort.DESCENDING)
+            } else {
+                mRealm.where(Task::class.java).equalTo("category", categorySearchString).findAll()
+                    .sort("date", Sort.DESCENDING)
+            }
 
         // 上記の結果を、TaskListとしてセットする
         mTaskAdapter.taskList = mRealm.copyFromRealm(taskRealmResults)
