@@ -10,6 +10,9 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.View
 import io.realm.Realm
+import io.realm.RealmChangeListener
+import io.realm.Sort
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_input.*
 import java.util.*
 
@@ -21,6 +24,12 @@ class InputActivity : AppCompatActivity() {
     private var mHour = 0
     private var mMinute = 0
     private var mTask: Task? = null
+    private val mRealmListener = object : RealmChangeListener<Realm> {
+        override fun onChange(element: Realm) {
+            reloadCategory()
+        }
+    }
+    private lateinit var mCategoryAdapter: CategoryAdapter
 
     private val mOnDateClickListener = View.OnClickListener {
         val datePickerDialog = DatePickerDialog(
@@ -68,6 +77,9 @@ class InputActivity : AppCompatActivity() {
             supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         }
 
+        // スピナーにカテゴリを設定する
+        reloadCategory()
+
         // カテゴリ作成画面に遷移できるようにする
         create_category.setOnClickListener {
             val intent = Intent(this@InputActivity, CreateCategoryActivity::class.java)
@@ -83,6 +95,8 @@ class InputActivity : AppCompatActivity() {
         val intent = intent
         val taskId = intent.getIntExtra(EXTRA_TASK, -1)
         val realm = Realm.getDefaultInstance()
+        realm.addChangeListener(mRealmListener)
+
         mTask = realm.where(Task::class.java).equalTo("id", taskId).findFirst()
         realm.close()
 
@@ -107,7 +121,7 @@ class InputActivity : AppCompatActivity() {
             // 更新の場合
             title_edit_text.setText(mTask!!.title)
             content_edit_text.setText(mTask!!.contents)
-            category_edit_text.setText(mTask!!.category)
+            select_category.setSelection(mTask!!.categoryId)
 
             val calendar = Calendar.getInstance()
             calendar.time = mTask!!.date
@@ -126,6 +140,25 @@ class InputActivity : AppCompatActivity() {
             date_button.text = dateString
             times_button.text = timeString
         }
+    }
+
+    private fun reloadCategory() {
+        // Realmの設定
+        val realm = Realm.getDefaultInstance()
+
+        mCategoryAdapter = CategoryAdapter(this@InputActivity)
+
+        val categoryRealmResults =
+            realm.where(Category::class.java).findAll().sort("id", Sort.ASCENDING)
+        // 上記の結果を、categoryListとしてセットする
+        mCategoryAdapter.categoryList = realm.copyFromRealm(categoryRealmResults)
+
+        // CategoryのListView用のアダプタに渡す
+        select_category.adapter = mCategoryAdapter
+
+        // 表示を更新するために、アダプターにデータが変更されたことを知らせる
+        mCategoryAdapter.notifyDataSetChanged()
+
     }
 
     private fun addTask() {
@@ -150,11 +183,11 @@ class InputActivity : AppCompatActivity() {
 
         val title = title_edit_text.text.toString()
         val content = content_edit_text.text.toString()
-        val category = category_edit_text.text.toString()
+        val categoryId = select_category.selectedItemId.toInt()
 
         mTask!!.title = title
         mTask!!.contents = content
-        mTask!!.category = category
+        mTask!!.categoryId = categoryId
         val calendar = GregorianCalendar(mYear, mMonth, mDay, mHour, mMinute)
         val date = calendar.time
         mTask!!.date = date

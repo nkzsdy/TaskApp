@@ -6,6 +6,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.view.View
+import android.widget.AdapterView
 import io.realm.Realm
 import io.realm.RealmChangeListener
 import io.realm.Sort
@@ -14,14 +16,16 @@ import kotlinx.android.synthetic.main.activity_main.*
 const val EXTRA_TASK = "jp.techacademy.ryota.taskapp.TASK"
 
 class MainActivity : AppCompatActivity() {
-    private var categorySearchString = ""
+    private var categoryId = 0
     private lateinit var mRealm: Realm
     private val mRealmListener = object : RealmChangeListener<Realm> {
         override fun onChange(element: Realm) {
-            reloadListView(categorySearchString)
+            reloadListView(categoryId)
+            reloadCategory()
         }
     }
     private lateinit var mTaskAdapter: TaskAdapter
+    private lateinit var mCategoryAdapter: CategoryAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,7 +81,7 @@ class MainActivity : AppCompatActivity() {
                 val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
                 alarmManager.cancel(resultPendingIntent)
 
-                reloadListView(categorySearchString)
+                reloadListView(categoryId)
             }
 
             builder.setNegativeButton("CANCEL", null)
@@ -89,21 +93,33 @@ class MainActivity : AppCompatActivity() {
         }
 
         // カテゴリ検索
-        category_search_button.setOnClickListener {
-            categorySearchString = category_search_text.text.toString()
-            reloadListView(categorySearchString)
-        }
+        category_search_spinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    categoryId = id.toInt()
+                    reloadListView(categoryId)
+                }
 
-        reloadListView(categorySearchString)
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                }
+            }
+
+        reloadCategory()
+        reloadListView(categoryId)
     }
 
-    private fun reloadListView(categorySearchString: String) {
+    private fun reloadListView(categoryId: Int) {
         // Realmデータベースから、「全てのデータを取得して新しい日時順に並べた結果」を取得
         val taskRealmResults =
-            if (categorySearchString.isEmpty()) {
+            if (categoryId == 0) {
                 mRealm.where(Task::class.java).findAll().sort("date", Sort.DESCENDING)
             } else {
-                mRealm.where(Task::class.java).equalTo("category", categorySearchString).findAll()
+                mRealm.where(Task::class.java).equalTo("categoryId", categoryId).findAll()
                     .sort("date", Sort.DESCENDING)
             }
 
@@ -115,6 +131,26 @@ class MainActivity : AppCompatActivity() {
 
         // 表示を更新するために、アダプターにデータが変更されたことを知らせる
         mTaskAdapter.notifyDataSetChanged()
+    }
+
+    private fun reloadCategory() {
+        // Realmの設定
+        var realm = Realm.getDefaultInstance()
+
+        mCategoryAdapter = CategoryAdapter(this@MainActivity)
+
+        val categoryRealmResults =
+            realm.where(Category::class.java).findAll().sort("id", Sort.ASCENDING)
+
+        // 上記の結果を、categoryListとしてセットする
+        mCategoryAdapter.categoryList = realm.copyFromRealm(categoryRealmResults)
+
+        // CategoryのListView用のアダプタに渡す
+        category_search_spinner.adapter = mCategoryAdapter
+
+        // 表示を更新するために、アダプターにデータが変更されたことを知らせる
+        mCategoryAdapter.notifyDataSetChanged()
+
     }
 
     override fun onDestroy() {
