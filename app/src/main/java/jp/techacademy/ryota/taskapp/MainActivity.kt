@@ -142,6 +142,18 @@ class MainActivity : AppCompatActivity() {
         val categoryRealmResults =
             realm.where(Category::class.java).findAll().sort("id", Sort.ASCENDING)
 
+
+        if (categoryRealmResults.size == 0) {
+            val category = Category()
+            category.id = 0
+            category.name = ""
+
+            realm.beginTransaction()
+            realm.copyToRealmOrUpdate(category)
+            realm.commitTransaction()
+            realm.close()
+        }
+
         // 上記の結果を、categoryListとしてセットする
         mCategoryAdapter.categoryList = realm.copyFromRealm(categoryRealmResults)
 
